@@ -293,7 +293,7 @@
     for (let i = 0; i < invoices.length; i++) {
         const canvas = await html2canvas(invoices[i], {
             scale: 2,
-            useCORS: true
+            useCORS: true,
             scrollY: -window.scrollY
         });
 
