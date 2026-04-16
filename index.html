@@ -3,21 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Premium Store App - Final</title>
+    <title>Premium Store App - Final (FIX A6)</title>
     <style>
-        /* GIỮ NGUYÊN 100% CSS GỐC CỦA BẠN */
         * { -webkit-tap-highlight-color: transparent !important; outline: none !important; box-sizing: border-box; }
         html, body { background-color: #000000; margin: 0; padding: 0; height: 100%; overflow: hidden; color: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
         body { display: flex; flex-direction: column; }
 
         .header-fixed { padding: 15px; background: #000; z-index: 10; display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid #222; }
         .calendar-trigger { font-size: 26px; cursor: pointer; background: #1C1C1E; padding: 8px 12px; border-radius: 15px; border: 1.5px solid #0A84FF; }
-        
         .total-summary { display: flex; align-items: center; gap: 12px; flex: 1; margin-left: 15px; }
         .stat-item { display: flex; flex-direction: column; }
         .stat-label { font-size: 9px; color: #8E8E93; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
         .divider { width: 1px; height: 22px; background: #333; }
-        
         .header-actions { display: flex; align-items: center; gap: 10px; }
         .btn-print-trigger { font-size: 22px; cursor: pointer; background: #1C1C1E; padding: 5px 10px; border-radius: 12px; border: 1px solid #333; }
         .btn-submit { background: transparent; border: 1.5px solid #0A84FF; color: #0A84FF; padding: 10px 18px; border-radius: 20px; font-weight: 700; font-size: 13px; white-space: nowrap; cursor: pointer; }
@@ -33,31 +30,32 @@
         .store-name { font-size: 15px; font-weight: 600; margin-bottom: 6px; color: #fff; }
         .coords-text { font-size: 12px; color: #8E8E93; margin-bottom: 4px; }
         .meta-row { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #0A84FF; font-weight: 500; }
-        
         .right-content { display: flex; gap: 10px; }
         .info-box { width: 50px; height: 50px; background: #1C1C1E; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px solid #333; }
         .label { font-size: 8px; color: #0A84FF; font-weight: 800; margin-bottom: 2px; }
         .value { font-size: 14px; font-weight: 800; }
 
-        /* VIEWER HÓA ĐƠN */
-        #invoice-viewer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #F2F2F7; display: none; z-index: 1100; overflow: auto; padding: 20px; }
-        #invoice-list-container { display: flex; flex-direction: column; align-items: flex-start; min-width: 155mm; }
-        .invoice-page { width: 148mm; height: 105mm; padding: 10mm; background: #fff; color: #000; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-family: Arial, sans-serif; flex-shrink: 0; position: relative; }
+        /* VIEWER HÓA ĐƠN (FIX SCROLL) */
+        #invoice-viewer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #F2F2F7; display: none; z-index: 1100; overflow-y: auto; overflow-x: hidden; padding: 20px; }
+        #invoice-list-container { display: flex; flex-direction: column; align-items: center; min-width: 155mm; }
+        .invoice-page { width: 148mm; height: 105mm; padding: 10mm; background: #fff; color: #000; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-family: Arial, sans-serif; flex-shrink: 0; position: relative; page-break-after: always; break-after: page; page-break-inside: avoid; }
         .inv-title { font-size: 22px; font-weight: bold; text-align: center; flex: 1; text-transform: uppercase; }
         .inv-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; }
         .inv-table th, .inv-table td { border: 1px solid #000; padding: 4px; text-align: center; }
-        
-        /* CÁC NÚT ĐIỀU KHIỂN TRÊN GIAO DIỆN */
-        .btn-exit-viewer { position: fixed; bottom: 25px; left: 25px; background: #FF3B30; color: #fff; border: none; padding: 15px 30px; border-radius: 30px; font-weight: bold; z-index: 1200; box-shadow: 0 4px 12px rgba(0,0,0,0.3); cursor: pointer; }
-        .btn-print-action { position: fixed; bottom: 25px; right: 25px; background: #34C759; color: #fff; border: none; padding: 15px 30px; border-radius: 30px; font-weight: bold; z-index: 1200; box-shadow: 0 4px 12px rgba(0,0,0,0.3); cursor: pointer; }
 
-        /* CSS QUAN TRỌNG KHI IN PDF (GITHUB/CHROME) */
+        .btn-exit-viewer { position: fixed; bottom: 25px; left: 25px; background: #FF3B30; color: #fff; border: none; padding: 15px 30px; border-radius: 30px; font-weight: bold; z-index: 1200; cursor: pointer; }
+        .btn-print-action { position: fixed; bottom: 25px; right: 25px; background: #34C759; color: #fff; border: none; padding: 15px 30px; border-radius: 30px; font-weight: bold; z-index: 1200; cursor: pointer; }
+
+        /* FIX IN A6 NGANG */
+        @page { size: A6 landscape; margin: 0; }
+
         @media print {
+            html, body { width: 148mm; margin: 0; padding: 0; overflow: visible !important; }
             body * { visibility: hidden; }
             #invoice-viewer, #invoice-viewer * { visibility: visible; }
-            #invoice-viewer { position: absolute; left: 0; top: 0; width: 100%; background: #fff !important; padding: 0 !important; }
+            #invoice-viewer { position: absolute; left: 0; top: 0; width: 100%; background: #fff !important; padding: 0 !important; overflow: visible !important; }
+            .invoice-page { width: 148mm; height: 105mm; margin: 0; page-break-after: always; break-after: page; page-break-inside: avoid; }
             .btn-exit-viewer, .btn-print-action { display: none !important; }
-            .invoice-page { page-break-after: always; margin: 0 !important; border: none !important; box-shadow: none !important; }
         }
 
         .full-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
@@ -69,7 +67,7 @@
         .day.not-in-data { color: #3A3A3C; pointer-events: none; }
         .day.selected { background: #0A84FF !important; color: white !important; font-weight: bold; }
         .day.has-data::after { content: ''; position: absolute; bottom: 4px; width: 3px; height: 3px; background: #555; border-radius: 50%; }
-        
+
         .stats-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 13px; color: white; }
         .stats-table th { color: #8E8E93; font-weight: 500; padding: 8px 5px; text-align: left; border-bottom: 0.5px solid #222; font-size: 10px; text-transform: uppercase; }
         .stats-table td { padding: 12px 5px; border-bottom: 0.5px solid #1a1a1a; }
