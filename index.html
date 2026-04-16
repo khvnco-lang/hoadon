@@ -38,7 +38,7 @@
         /* VIEWER HÓA ĐƠN (FIX SCROLL) */
         #invoice-viewer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #F2F2F7; display: none; z-index: 1100; overflow-y: auto; overflow-x: hidden; padding: 20px; }
         #invoice-list-container { display: flex; flex-direction: column; align-items: center; min-width: 155mm; }
-        .invoice-page { width: 148mm; height: 105mm; padding: 10mm; background: #fff; color: #000; margin: 0; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-family: Arial, sans-serif; flex-shrink: 0; position: relative; page-break-after: always; break-after: page; page-break-inside: avoid; }
+        .invoice-page { width: 148mm; height: 105mm; padding: 8mm; overflow: hidden; background: #fff; color: #000; margin: 0; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-family: Arial, sans-serif; flex-shrink: 0; position: relative; page-break-after: always; break-after: page; page-break-inside: avoid; }
         .inv-title { font-size: 22px; font-weight: bold; text-align: center; flex: 1; text-transform: uppercase; }
         .inv-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; }
         .inv-table th, .inv-table td { border: 1px solid #000; padding: 4px; text-align: center; }
@@ -283,6 +283,7 @@
         const canvas = await html2canvas(invoices[i], {
             scale: 2,
             useCORS: true
+            scrollY: -window.scrollY
         });
 
         const imgData = canvas.toDataURL("image/jpeg", 1.0);
