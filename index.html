@@ -268,32 +268,32 @@
 // ===== THÊM HÀM XUẤT PDF =====
   // ===== JS CỦA BẠN (GIỮ NGUYÊN) =====
 
-   async function exportPDF(){
-        const invoices = document.querySelectorAll(".invoice-page");
+  async function exportPDF(){
+    const invoices = document.querySelectorAll(".invoice-page");
 
-        const { jsPDF } = window.jspdf;
+    const { jsPDF } = window.jspdf; // 👈 QUAN TRỌNG
 
-        const pdf = new jsPDF({
-            unit: 'mm',
-            format: [148,105],
-            orientation: 'landscape'
+    const pdf = new jsPDF({
+        unit: 'mm',
+        format: [148,105],
+        orientation: 'landscape'
+    });
+
+    for (let i = 0; i < invoices.length; i++) {
+        const canvas = await html2canvas(invoices[i], {
+            scale: 2,
+            useCORS: true
         });
 
-        for (let i = 0; i < invoices.length; i++) {
-            const canvas = await html2canvas(invoices[i], {
-                scale: 2,
-                useCORS: true
-            });
+        const imgData = canvas.toDataURL("image/jpeg", 1.0);
 
-            const imgData = canvas.toDataURL("image/jpeg", 1.0);
+        if (i > 0) pdf.addPage();
 
-            if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, 0, 148, 105);
+    }
 
-            pdf.addImage(imgData, 'JPEG', 0, 0, 148, 105);
-        }
-
-        pdf.save("hoa-don.pdf");
-   }
+    pdf.save("hoa-don.pdf");
+}
 </script>
 
 <!-- THƯ VIỆN BẮT BUỘC -->
