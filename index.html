@@ -266,24 +266,33 @@
         async function executeSend() { const btn = document.querySelector(".btn-submit"); btn.innerText = "..."; btn.disabled = true; try { await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(window.currentSend) }); document.getElementById("successToast").style.display = "block"; if (window.navigator?.vibrate) window.navigator.vibrate(200); setTimeout(() => location.reload(), 2000); } catch (e) { alert("Lỗi gửi!"); btn.innerText = "Khai báo +"; btn.disabled = false; } }
         window.onload = loadData;
 // ===== THÊM HÀM XUẤT PDF =====
-   function exportPDF(){
-       const element = document.getElementById("invoice-list-container");
+   async function exportPDF(){
+    const invoices = document.querySelectorAll(".invoice-page");
 
-       const opt = {
-           margin: 0,
-           filename: 'hoa-don.pdf',
-           image: { type: 'jpeg', quality: 1 },
-           html2canvas: { scale: 3, useCORS: true },
-           jsPDF: { unit: 'mm', format: [148,105], orientation: 'landscape' },
-           pagebreak: { mode: ['css', 'legacy'] }
-       };
+    const pdf = new jspdf.jsPDF({
+        unit: 'mm',
+        format: [148,105],
+        orientation: 'landscape'
+    });
 
-       html2pdf().set(opt).from(element).save();
-   }
+    for (let i = 0; i < invoices.length; i++) {
+        const canvas = await html2canvas(invoices[i], {
+            scale: 2
+        });
+
+        const imgData = canvas.toDataURL("image/jpeg", 1.0);
+
+        if (i > 0) pdf.addPage();
+
+        pdf.addImage(imgData, 'JPEG', 0, 0, 148, 105);
+    }
+
+    pdf.save("hoa-don.pdf");
+}
 </script>
 
 <!-- THƯ VIỆN PDF (BẮT BUỘC) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <!-- NÚT XUẤT PDF -->
 <button id="btn-pdf" onclick="exportPDF()" 
