@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Premium Store App - Final</title>
+    <style>
+        /* GIỮ NGUYÊN 100% THIẾT KẾ GỐC CỦA BẠN */
+        * { -webkit-tap-highlight-color: transparent !important; outline: none !important; box-sizing: border-box; }
+        html, body { background-color: #000000; margin: 0; padding: 0; height: 100%; overflow: hidden; color: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { display: flex; flex-direction: column; }
+
+        .header-fixed { padding: 15px; background: #000; z-index: 10; display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid #222; }
+        .calendar-trigger { font-size: 26px; cursor: pointer; background: #1C1C1E; padding: 8px 12px; border-radius: 15px; border: 1.5px solid #0A84FF; }
+        .total-summary { display: flex; align-items: center; gap: 12px; flex: 1; margin-left: 15px; }
+        .stat-item { display: flex; flex-direction: column; }
+        .stat-label { font-size: 9px; color: #8E8E93; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+        .divider { width: 1px; height: 22px; background: #333; }
+        .header-actions { display: flex; align-items: center; gap: 10px; }
+        .btn-print-trigger { font-size: 22px; cursor: pointer; background: #1C1C1E; padding: 5px 10px; border-radius: 12px; border: 1px solid #333; }
+        .btn-submit { background: transparent; border: 1.5px solid #0A84FF; color: #0A84FF; padding: 10px 18px; border-radius: 20px; font-weight: 700; font-size: 13px; white-space: nowrap; cursor: pointer; }
+
+        .search-container { padding: 10px 15px; background: #000; }
+        .search-wrapper { position: relative; display: flex; align-items: center; }
+        .search-input { width: 100%; background: #1C1C1E; border: none; border-radius: 10px; padding: 10px 15px 10px 35px; color: #fff; font-size: 14px; }
+        .search-icon { position: absolute; left: 10px; color: #8E8E93; font-size: 14px; }
+
+        .scrollable-content { flex: 1; overflow-y: auto; padding: 10px 15px 100px 15px; -webkit-overflow-scrolling: touch; }
+        #order-list { list-style: none; padding: 0; margin: 0; }
+        li { background: #111111; margin-bottom: 12px; padding: 16px; border-radius: 20px; border: 1px solid #222; display: flex; justify-content: space-between; align-items: flex-end; }
+        .store-name { font-size: 15px; font-weight: 600; margin-bottom: 6px; color: #fff; }
+        .coords-text { font-size: 12px; color: #8E8E93; margin-bottom: 4px; }
+        .meta-row { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #0A84FF; font-weight: 500; }
+        .right-content { display: flex; gap: 10px; }
+        .info-box { width: 50px; height: 50px; background: #1C1C1E; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px solid #333; }
+        .label { font-size: 8px; color: #0A84FF; font-weight: 800; margin-bottom: 2px; }
+        .value { font-size: 14px; font-weight: 800; }
+
+        /* VIEWER HÓA ĐƠN */
+        #invoice-viewer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #F2F2F7; display: none; z-index: 1100; overflow: auto; padding: 20px; }
+        #invoice-list-container { display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .invoice-page { width: 148mm; min-height: 105mm; padding: 10mm; background: #fff; color: #000; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-family: Arial, sans-serif; position: relative; }
+        .inv-title { font-size: 30px; font-weight: bold; text-transform: uppercase; text-align: right; letter-spacing: 1px; }
+        .inv-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; }
+        .inv-table th, .inv-table td { border: 1px solid #000; padding: 4px; text-align: center; }
+        .btn-exit-viewer { position: fixed; bottom: 25px; left: 25px; background: #FF3B30; color: #fff; border: none; padding: 15px 30px; border-radius: 30px; font-weight: bold; z-index: 1200; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .btn-print-now { position: fixed; bottom: 25px; right: 25px; background: #34C759; color: #fff; border: none; padding: 15px 30px; border-radius: 30px; font-weight: bold; z-index: 1200; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+
+        /* CSS PHỤC VỤ IN 200 ĐƠN */
+        @media print {
+            body * { visibility: hidden; }
+            #invoice-viewer, #invoice-viewer * { visibility: visible; }
+            #invoice-viewer { position: absolute; left: 0; top: 0; width: 100%; background: #fff !important; padding: 0 !important; }
+            .btn-exit-viewer, .btn-print-now { display: none !important; }
+            .invoice-page { page-break-after: always; margin: 0 !important; border: none !important; box-shadow: none !important; width: 100%; }
+        }
+
+        /* LỊCH & POPUP */
+        .full-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        .popup-box { background: #121212; width: 92%; max-width: 360px; border-radius: 28px; padding: 22px; border: 1px solid #222; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; margin-bottom: 20px; background: #1c1c1e; padding: 12px; border-radius: 18px; border: 1px solid #222; }
+        .day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 13px; border-radius: 50%; position: relative; color: #3A3A3C; }
+        .day.has-data { color: #fff; cursor: pointer; }
+        .day.selected { background: #0A84FF !important; color: white !important; font-weight: bold; }
+        .stats-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 13px; color: #fff; }
+        .stats-table th { color: #8E8E93; font-weight: 500; padding: 8px 5px; text-align: left; border-bottom: 0.5px solid #222; font-size: 10px; text-transform: uppercase; }
+        .btn-close { width: 100%; background: #FF3B30; color: #fff; border: none; padding: 15px; border-radius: 18px; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <div class="header-fixed">
+        <div class="calendar-trigger" onclick="togglePopup(true)">📅</div>
+        <div class="total-summary">
+            <div class="stat-item"><span class="stat-label">Khách</span><b id="count-val" style="color: #0A84FF; font-size: 17px;">0</b></div>
+            <div class="divider"></div>
+            <div class="stat-item"><span class="stat-label">Tổng lố</span><b id="sum-ds-val" style="color: #FFD60A; font-size: 17px;">0</b></div>
+        </div>
+        <div class="header-actions">
+            <div class="btn-print-trigger" onclick="generateAllInvoices()">🖨️</div>
+            <button class="btn-submit" onclick="submitData()">Khai báo +</button>
+        </div>
+    </div>
+
+    <div class="search-container">
+        <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" class="search-input" placeholder="Tìm tên cửa hàng..." oninput="updateDisplay()">
+        </div>
+    </div>
+
+    <div class="scrollable-content">
+        <div id="loading" style="text-align:center; padding:40px; color:#8E8E93;">⏳ Đang đồng bộ...</div>
+        <ul id="order-list"></ul>
+    </div>
+
+    <div id="invoice-viewer">
+        <button class="btn-exit-viewer" onclick="closeViewer()">Thoát</button>
+        <button class="btn-print-now" onclick="window.print()">🖨️ In PDF</button>
+        <div id="invoice-list-container"></div>
+    </div>
+
+    <div id="fullPopup" class="full-overlay">
+        <div class="popup-box">
+            <div id="calendarGrid" class="calendar-grid">
+                <div class="weekday">T2</div><div class="weekday">T3</div><div class="weekday">T4</div><div class="weekday">T5</div><div class="weekday">T6</div><div class="weekday">T7</div><div class="weekday">CN</div>
+            </div>
+            <table class="stats-table">
+                <thead><tr><th>NV</th><th align="center">ĐƠN</th><th align="center">DS</th><th align="center">KM</th></tr></thead>
+                <tbody id="stats-body"></tbody>
+            </table>
+            <button class="btn-close" onclick="togglePopup(false)">Xong</button>
+        </div>
+    </div>
+
+    <script>
+        const CSV_URL = "https://docs.google.com/spreadsheets/d/1brtLdmHrER-m9nSGgInMLCYTwOqRpLbWO-sucC1G9v0/gviz/tq?tqx=out:csv&sheet=1.GHI HÀNG&tq=SELECT B, C, H, I, F, G WHERE H > 0 ORDER BY F ASC, O ASC  &headers=1";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxiWwpN2AcUriTAwBaU7E9FGtkQfekxvWxoyfAtxe61UMDe5rkcRXsApNUghfvrhRJZ/exec";
+
+        let allData = []; let selectedDates = new Set(); let datesInCSV = new Set();
+        let currentFilteredData = [];
+
+        async function loadData() {
+            try {
+                const res = await fetch(CSV_URL);
+                const text = await res.text();
+                const rows = text.split('\n').filter(r => r.trim() !== "");
+                rows.shift(); allData = []; datesInCSV.clear();
+                rows.forEach(row => {
+                    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, '').trim());
+                    if (cols.length >= 6) {
+                        allData.push({ name: cols[0], coords: cols[1], ds: parseFloat(cols[2]) || 0, km: parseFloat(cols[3]) || 0, msnv: cols[4], date: cols[5] });
+                        datesInCSV.add(cols[5]);
+                    }
+                });
+                initCalendar(); updateDisplay();
+            } catch (e) { document.getElementById("loading").innerText = "Lỗi kết nối!"; }
+        }
+
+        function initCalendar() {
+            const grid = document.getElementById("calendarGrid");
+            grid.innerHTML = `<div class="weekday">T2</div><div class="weekday">T3</div><div class="weekday">T4</div><div class="weekday">T5</div><div class="weekday">T6</div><div class="weekday">T7</div><div class="weekday">CN</div>`;
+            for (let i = 0; i < 2; i++) grid.appendChild(document.createElement('div'));
+            for (let d = 1; d <= 30; d++) {
+                const dayEl = document.createElement('div'); dayEl.className = 'day'; dayEl.innerText = d;
+                const dStr = `${d}/4/2026`, dStrFull = `${d < 10 ? '0'+d : d}/04/2026`;
+                const fDate = datesInCSV.has(dStr) ? dStr : (datesInCSV.has(dStrFull) ? dStrFull : null);
+                if (fDate) {
+                    dayEl.classList.add('has-data');
+                    dayEl.onclick = () => {
+                        if (selectedDates.has(fDate)) selectedDates.delete(fDate); else selectedDates.add(fDate);
+                        dayEl.classList.toggle('selected');
+                        updateDisplay();
+                    };
+                }
+                grid.appendChild(dayEl);
+            }
+        }
+
+        function updateDisplay() {
+            let listHtml = "", statsHtml = "", stats = {}, totalDS = 0;
+            const term = document.getElementById("search-input").value.toLowerCase();
+            currentFilteredData = [];
+            allData.forEach(item => {
+                if ((selectedDates.size === 0 || selectedDates.has(item.date)) && item.name.toLowerCase().includes(term)) {
+                    currentFilteredData.push(item);
+                    if (!stats[item.msnv]) stats[item.msnv] = { c: 0, d: 0, k: 0 };
+                    stats[item.msnv].c++; stats[item.msnv].d += item.ds; stats[item.msnv].k += item.km;
+                    totalDS += item.ds;
+                    listHtml += `<li><div class="left-content"><div class="store-name">${item.name}</div><div class="coords-text">📍 ${item.coords}</div><div class="meta-row">👤 ${item.msnv} | 📅 ${item.date}</div></div><div class="right-content"><div class="info-box"><div class="label">DS</div><div class="value">${item.ds}</div></div><div class="info-box"><div class="label">KM</div><div class="value">${item.km}</div></div></div></li>`;
+                }
+            });
+            for (let k in stats) {
+                statsHtml += `<tr><td>${k}</td><td align="center"><b>${stats[k].c}</b></td><td align="center" style="color:#0A84FF"><b>${stats[k].d}</b></td><td align="center"><b>${stats[k].k}</b></td></tr>`;
+            }
+            document.getElementById("order-list").innerHTML = listHtml;
+            document.getElementById("stats-body").innerHTML = statsHtml || "<tr><td colspan='4' align='center'>Trống</td></tr>";
+            document.getElementById("count-val").innerText = currentFilteredData.length;
+            document.getElementById("sum-ds-val").innerText = totalDS.toLocaleString();
+            document.getElementById("loading").style.display = "none";
+            window.currentSend = currentFilteredData.map(i => ["=ROW()", i.name, i.coords, i.ds, i.msnv, i.date]);
+        }
+
+        async function submitData() {
+            if (!window.currentSend?.length) return;
+            const btn = document.querySelector('.btn-submit');
+            btn.innerText = "Đang gửi..."; btn.disabled = true;
+            try {
+                await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(window.currentSend) });
+                alert("Khai báo thành công " + window.currentSend.length + " đơn!");
+            } catch (e) { alert("Lỗi gửi dữ liệu!"); }
+            finally { btn.innerText = "Khai báo +"; btn.disabled = false; }
+        }
+
+        function generateAllInvoices() {
+            if (currentFilteredData.length === 0) return;
+            let html = "";
+            currentFilteredData.forEach(item => {
+                const total = item.ds * 86000;
+                html += `
+                <div class="invoice-page">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="font-size:10px;"><b style="display:block;">TLDVNCO</b>0933.29.29.97 - 0933.11.22.08</div>
+                        <div class="inv-title">BÁO GIÁ KHÁCH HÀNG</div>
+                    </div>
+                    <div style="text-align:right; font-style:italic; font-size:10px; margin:5px 0;">${item.date}</div>
+                    <div style="margin-bottom:10px;">
+                        <div style="font-size: 20px; font-weight: bold; text-transform: uppercase;">${item.name}</div>
+                        <div style="font-size:10px; display:flex; justify-content:space-between;">
+                            <div>Sđt:</div><div>Mã NV: ${item.msnv}</div>
+                        </div>
+                    </div>
+                    <table class="inv-table">
+                        <thead style="background:#eeeeee;"><tr><th width="30">STT</th><th>Tên Hàng</th><th>Đơn Vị</th><th>Số Lượng</th><th>Thành Tiền</th></tr></thead>
+                        <tbody>
+                            <tr><td>1.</td><td>Vớ</td><td>Lô</td><td>${item.ds}</td><td align="right">${total.toLocaleString()} đ</td></tr>
+                            <tr><td>2.</td><td>Khuyến Mãi</td><td>Đôi</td><td>${item.km}</td><td></td></tr>
+                            <tr style="font-weight:bold; background:#eeeeee;"><td colspan="4">Tổng Cộng</td><td align="right">${total.toLocaleString()} đ</td></tr>
+                        </tbody>
+                    </table>
+                    <div style="font-size: 10px; line-height: 1.1; margin-top: 10px; border-top: 0.5px dashed #000; padding-top: 5px;">
+                        <span style="font-weight:bold; font-style:italic;">Chú ý:</span> Nếu lấy hàng Quý khách vui lòng kiểm tra kỹ hàng hóa trước khi nhân viên rời khỏi cửa hàng. Nhân viên có trách nhiệm đồng kiểm và trưng bày cho khách hàng.
+                    </div>
+                </div>`;
+            });
+            document.getElementById("invoice-list-container").innerHTML = html;
+            document.getElementById("invoice-viewer").style.display = "block";
+        }
+
+        function closeViewer() { document.getElementById("invoice-viewer").style.display = "none"; }
+        function togglePopup(show) { document.getElementById("fullPopup").style.display = show ? "flex" : "none"; }
+        window.onload = loadData;
+    </script>
+</body>
+</html>
