@@ -266,35 +266,41 @@
         async function executeSend() { const btn = document.querySelector(".btn-submit"); btn.innerText = "..."; btn.disabled = true; try { await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(window.currentSend) }); document.getElementById("successToast").style.display = "block"; if (window.navigator?.vibrate) window.navigator.vibrate(200); setTimeout(() => location.reload(), 2000); } catch (e) { alert("Lỗi gửi!"); btn.innerText = "Khai báo +"; btn.disabled = false; } }
         window.onload = loadData;
 // ===== THÊM HÀM XUẤT PDF =====
+  // ===== JS CỦA BẠN (GIỮ NGUYÊN) =====
+
    async function exportPDF(){
-    const invoices = document.querySelectorAll(".invoice-page");
+        const invoices = document.querySelectorAll(".invoice-page");
 
-    const pdf = new jspdf.jsPDF({
-        unit: 'mm',
-        format: [148,105],
-        orientation: 'landscape'
-    });
+        const { jsPDF } = window.jspdf;
 
-    for (let i = 0; i < invoices.length; i++) {
-        const canvas = await html2canvas(invoices[i], {
-            scale: 2
+        const pdf = new jsPDF({
+            unit: 'mm',
+            format: [148,105],
+            orientation: 'landscape'
         });
 
-        const imgData = canvas.toDataURL("image/jpeg", 1.0);
+        for (let i = 0; i < invoices.length; i++) {
+            const canvas = await html2canvas(invoices[i], {
+                scale: 2,
+                useCORS: true
+            });
 
-        if (i > 0) pdf.addPage();
+            const imgData = canvas.toDataURL("image/jpeg", 1.0);
 
-        pdf.addImage(imgData, 'JPEG', 0, 0, 148, 105);
-    }
+            if (i > 0) pdf.addPage();
 
-    pdf.save("hoa-don.pdf");
-}
+            pdf.addImage(imgData, 'JPEG', 0, 0, 148, 105);
+        }
+
+        pdf.save("hoa-don.pdf");
+   }
 </script>
 
-<!-- THƯ VIỆN PDF (BẮT BUỘC) -->
+<!-- THƯ VIỆN BẮT BUỘC -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<!-- NÚT XUẤT PDF -->
+<!-- NÚT PDF -->
 <button id="btn-pdf" onclick="exportPDF()" 
 style="
 display:none;
@@ -314,4 +320,3 @@ z-index: 1200;
 
 </body>
 </html>
-  
